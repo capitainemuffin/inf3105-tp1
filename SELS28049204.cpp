@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cassert>
 
 class Rectangle {
 
@@ -50,19 +51,19 @@ std::ifstream& lecture_fichier_texte(std::ifstream& fichier){
 
 		std::string repertoire;
 
-		std::cout << "Veuillez entrer le nom du fichier." << std::endl;
+		std::cout << "Veuillez entrer le nom du fichier." << std::endl;
 		std::cin >> repertoire;
-		
+
 		fichier.open(repertoire.c_str());
 
 		if (repertoire.length() < 5 || !fichier){
 
-			std::cout << "Fichier spécifié invalide." << std::endl;
+			std::cout << "Fichier spécifié invalide." << std::endl;
 			fichier.close();
 
 		} else if(repertoire.substr(repertoire.length() - 4, 4) != ".txt"){
 
-			std::cout << "Le fichier doit terminer par \".txt\"" << std::endl;
+			std::cout << "Le fichier doit terminer par \".txt\"" << std::endl;
 			fichier.close();
 
 		} else {
@@ -87,7 +88,7 @@ std::istream& operator >> (std::istream& is, Rectangle& rectangle){
 
 		rectangle.type = type_tmp == 'p' ? Rectangle::Type::positif : Rectangle::Type::negatif;
 
-		is >> rectangle.x >> rectangle.y >> rectangle.longueur >> rectangle.hauteur;
+		is >> rectangle.x >> rectangle.y >> rectangle.longueur >> rectangle.hauteur;
 
 	}
 
@@ -102,4 +103,6 @@ std::istream& operator >> (std::istream& is, Grille& grille){
 		is >> rectangle;
 		//ajouter à la grille
 	}
+
+	return is;
 }
