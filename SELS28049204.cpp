@@ -6,15 +6,69 @@
 
 class Rectangle {
 
+	enum class Type { 
+
+		positif, negatif 
+
+	};
+
+	class Coin {
+
+		double x, y;
+
+	public:
+
+		Coin() : x(0), y(0) {}
+
+		Coin(double x, double y){
+
+			this->x = x;
+			this->y = y;
+
+		}
+
+	};
+
 public:
 
-	enum class Type { positif, negatif };
-
 	Type type;
-	double x;
-	double y;
-	double longueur;
-	double hauteur;
+	Coin sup_gauche, sup_droit, inf_gauche, inf_droit;
+
+	Rectangle() : 
+		sup_gauche(Coin()),
+		sup_droit(Coin()),
+		inf_gauche(Coin()),
+		inf_droit(Coin())
+	{}
+
+	Rectangle(char type, double x, double y, double longueur, double hauteur){
+
+		assert(type == 'p' || type == 'n');
+		assert(longueur > 0 && hauteur > 0);
+
+		this->type = type == 'p' ? Type::positif : Type::negatif;
+
+		double sup_gauche_x = x - (longueur / 2) + (hauteur / 2);
+		double sup_gauche_y = y + (hauteur / 2) - (longueur / 2);
+
+		this->sup_gauche = Coin (sup_gauche_x, sup_gauche_y);
+
+		double sup_droit_x = x + (longueur / 2) + (hauteur / 2);
+		double sup_droit_y = y + (hauteur / 2) + (longueur + 2);
+
+		this->sup_droit = Coin (sup_droit_x, sup_droit_y);
+
+		double inf_gauche_x = x - (longueur / 2) - (hauteur / 2);
+		double inf_gauche_y = y - (hauteur / 2) - (longueur / 2);
+
+		this->inf_gauche = Coin (inf_gauche_x, inf_gauche_y);
+
+		double inf_droit_x = x + (longueur / 2) - (hauteur / 2);
+		double inf_droit_y = y - (hauteur / 2) + (longueur /2);
+
+		this->inf_droit = Coin(inf_droit_x, inf_droit_y);
+
+	}
 
 	friend std::istream& operator >> (std::istream& is, Rectangle& rectangle);
 
@@ -24,6 +78,8 @@ class Grille{
 
 private:
 
+	std::vector<int> x;
+	std::vector<int> y;
 	std::vector<Rectangle> rectangles;
 
 public:
@@ -38,38 +94,14 @@ public:
 	long double aire(){
 
 		long double aire = 0;
-
 		return aire;
 	}
 
 	double perimetre(){
 
 		double perimetre = 0;
-
 		return perimetre;
 	}
-
-	void afficher(){
-
-		for(int i = 0 ; i < this->rectangles.size() ; i++ ) {
-
-			if (rectangles[i].type == Rectangle::Type::positif) {
-
-				std::cout << "Positif " << std::endl;
-
-			} else if (rectangles[i].type == Rectangle::Type::negatif){
-
-				std::cout << "Négatif " << std::endl;
-
-			}
-
-			std::cout << "X : " << rectangles[i].x << std::endl;
-			std::cout << "Y : " << rectangles[i].y << std::endl;
-			std::cout << "Longueur : " <<rectangles[i].longueur << std::endl; 
-			std::cout << "Hauteur : " <<rectangles[i].hauteur << std::endl;
-
-		}
-	}	
 
 };
 
@@ -92,7 +124,9 @@ int main(){
 	fichier >> grille;
 	fichier.close();
 
-	grille.afficher();
+	std::cout << "aire : " << grille.aire() << std::endl 
+	<< "perimetre : " << grille.perimetre() << std::endl;
+
 
 }
 
@@ -101,7 +135,9 @@ int main(){
 **/
 std::ifstream& validation_fichier(std::ifstream& fichier){
 
-	while(true){
+	bool valide = false;
+
+	while(!valide){
 
 		std::string repertoire;
 
@@ -122,11 +158,13 @@ std::ifstream& validation_fichier(std::ifstream& fichier){
 
 		} else {
 
-			return fichier;
+			valide = true;
 
 		}
 
 	}
+
+	return fichier;
 
 }
 
@@ -134,17 +172,16 @@ std::istream& operator >> (std::istream& is, Rectangle& rectangle){
 
 	if(is){
 
-		char type_tmp;
+		char type;
+		double x, y, longueur, hauteur;
 
-		is >> type_tmp >> std::ws;
-		assert(type_tmp == 'p' || type_tmp == 'n');
+		is >> type >> std::ws;
+		is >> x >> std::ws;
+		is >> y >> std::ws;
+		is >> longueur >> std::ws;
+		is >> hauteur >> std::ws;
 
-		rectangle.type = type_tmp == 'p' ? Rectangle::Type::positif : Rectangle::Type::negatif;
-
-		is >> rectangle.x >> std::ws;
-		is >> rectangle.y >> std::ws;
-		is >> rectangle.longueur >> std::ws;
-		is >> rectangle.hauteur >> std::ws;
+		rectangle = Rectangle(type, x, y, longueur, hauteur);
 
 	}
 
