@@ -164,7 +164,7 @@ std::ifstream& validation_fichier(std::ifstream& fichier){
 
 }
 
-std::ostream& operator <<  (std::ostream& os, Rectangle::Coin& coin){
+std::ostream& operator << (std::ostream& os, Rectangle::Coin& coin){
 
 	os << "(" <<  coin.x <<  "," << coin.y << ")";
 
@@ -175,17 +175,17 @@ std::ostream& operator <<  (std::ostream& os, Rectangle& rectangle){
 
 	if (rectangle.estPositif()) {
 
-		os << "Rectangle positif" <<  std::endl;
+		os << "Rectangle positif" << std::endl;
 
 	} else {
 
-		os <<  "Rectangle negatif" << std::endl;
+		os << "Rectangle negatif" << std::endl;
 	}
 
-	os <<  "Supérieur gauche : " << rectangle.sup_gauche <<  std::endl;
-	os <<  "Supérieur droite : " << rectangle.sup_droit <<  std::endl;
-	os <<  "Inférieur gauche : " << rectangle.inf_gauche <<  std::endl;
-	os <<  "Inférieur droit : " << rectangle.inf_droit <<  std::endl;
+	os << "Supérieur gauche : " << rectangle.sup_gauche << std::endl;
+	os << "Supérieur droite : " << rectangle.sup_droit << std::endl;
+	os << "Inférieur gauche : " << rectangle.inf_gauche << std::endl;
+	os << "Inférieur droit : " << rectangle.inf_droit << std::endl;
 	
 	return os;
 
@@ -203,8 +203,10 @@ std::istream& operator >> (std::istream& is, Rectangle& rectangle){
 		is >> y >> std::ws;
 		is >> longueur >> std::ws;
 		is >> hauteur >> std::ws;
-		std::cout <<  "X : " <<  x <<  " Y : " << y << " L : " << longueur << " H : "<<hauteur <<  std::endl;
 		rectangle = Rectangle(type, x, y, longueur, hauteur);
+
+		std::cout <<  "X : " <<  x <<  " Y : " << y << " L : " << longueur << " H : " << hauteur << std::endl;
+
 
 	}
 
