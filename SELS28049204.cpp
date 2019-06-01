@@ -215,7 +215,7 @@ std::istream& operator >> (std::ifstream& is, Rectangle& rectangle){
 
 std::istream& operator >> (std::ifstream& is, Grille& grille){
 
-	while (is){
+	while (!is.eof()){
 
 		Rectangle rectangle;
 		is >> rectangle;
