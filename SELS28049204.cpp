@@ -22,30 +22,84 @@ public:
 
 class Grille{
 
-public:
+private:
 
 	std::vector<Rectangle> rectangles;
+
+public:
+
 	friend std::istream& operator >> (std::istream& is, Grille& grille);
 
 	void ajouter(Rectangle& rectangle){
 
-		//ajouter un rectangle
+		this->rectangles.push_back(rectangle);
 	}
+
+	long double aire(){
+
+		long double aire = 0;
+
+		return aire;
+	}
+
+	double perimetre(){
+
+		double perimetre = 0;
+
+		return perimetre;
+	}
+
+	void afficher(){
+
+		for(int i = 0 ; i < this->rectangles.size() ; i++ ) {
+
+			if (rectangles[i].type == Rectangle::Type::positif) {
+
+				std::cout << "Positif " << std::endl;
+
+			} else if (rectangles[i].type == Rectangle::Type::negatif){
+
+				std::cout << "Négatif " << std::endl;
+
+			}
+
+			std::cout << "X : " << rectangles[i].x << std::endl;
+			std::cout << "Y : " << rectangles[i].y << std::endl;
+			std::cout << "Longueur : " <<rectangles[i].longueur << std::endl; 
+			std::cout << "Hauteur : " <<rectangles[i].hauteur << std::endl;
+
+		}
+	}	
 
 };
 
-std::ifstream& lecture_fichier_texte(std::ifstream& fichier);
-std::istream& operator >> (std::istream& is, Rectangle& rectangle);
+/**
+* Déclaration 
+**/
+std::ifstream& validation_fichier(std::ifstream&);
+std::istream& operator >> (std::istream&, Rectangle&);
+std::istream& operator >> (std::ifstream&, Grille&);
 
+/**
+* Main 
+**/
 int main(){
 
 	std::ifstream fichier;
-	lecture_fichier_texte(fichier);
+	validation_fichier(fichier);
 
+	Grille grille = Grille();
+	fichier >> grille;
+	fichier.close();
+
+	grille.afficher();
 
 }
 
-std::ifstream& lecture_fichier_texte(std::ifstream& fichier){
+/**
+* Implémentation
+**/
+std::ifstream& validation_fichier(std::ifstream& fichier){
 
 	while(true){
 
@@ -82,26 +136,28 @@ std::istream& operator >> (std::istream& is, Rectangle& rectangle){
 
 		char type_tmp;
 
-		is >> type_tmp;
-
+		is >> type_tmp >> std::ws;
 		assert(type_tmp == 'p' || type_tmp == 'n');
 
 		rectangle.type = type_tmp == 'p' ? Rectangle::Type::positif : Rectangle::Type::negatif;
 
-		is >> rectangle.x >> rectangle.y >> rectangle.longueur >> rectangle.hauteur;
+		is >> rectangle.x >> std::ws;
+		is >> rectangle.y >> std::ws;
+		is >> rectangle.longueur >> std::ws;
+		is >> rectangle.hauteur >> std::ws;
 
 	}
 
 	return is;
 }
 
-std::istream& operator >> (std::istream& is, Grille& grille){
+std::istream& operator >> (std::ifstream& is, Grille& grille){
 
 	while (is){
 
 		Rectangle rectangle;
 		is >> rectangle;
-		//ajouter à la grille
+		grille.ajouter(rectangle);
 	}
 
 	return is;
