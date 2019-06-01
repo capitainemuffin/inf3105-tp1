@@ -60,7 +60,7 @@ public:
 		return this->type == Type::positif;
 	}
 
-	friend std::istream& operator >> (std::istream&, Rectangle&);
+	friend std::istream& operator >> (std::ifstream&, Rectangle&);
 	friend std::ostream& operator << (std::ostream&, Coin&);
 	friend std::ostream& operator << (std::ostream&, Rectangle&);
 
@@ -100,7 +100,7 @@ public:
 std::ifstream& validation_fichier(std::ifstream&);
 std::ostream& operator << (std::ostream&, Rectangle&);
 std::ostream& operator << (std::ostream&, Rectangle::Coin&);
-std::istream& operator >> (std::istream&, Rectangle&);
+std::istream& operator >> (std::ifstream&, Rectangle&);
 std::istream& operator >>  (std::ifstream&, Grille&);
 
 
@@ -191,7 +191,7 @@ std::ostream& operator <<  (std::ostream& os, Rectangle& rectangle){
 
 }
 
-std::istream& operator >> (std::istream& is, Rectangle& rectangle){
+std::istream& operator >> (std::ifstream& is, Rectangle& rectangle){
 
 	if(is){
 
