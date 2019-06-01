@@ -27,6 +27,8 @@ class Rectangle {
 
 		}
 
+		friend std::ostream& operator << (std::ostream&, Coin&);
+
 	};
 
 public:
@@ -47,44 +49,29 @@ public:
 		assert(longueur > 0 && hauteur > 0);
 
 		this->type = type == 'p' ? Type::positif : Type::negatif;
-
-		double sup_gauche_x = x - (longueur / 2) + (hauteur / 2);
-		double sup_gauche_y = y + (hauteur / 2) - (longueur / 2);
-
-		this->sup_gauche = Coin (sup_gauche_x, sup_gauche_y);
-
-		double sup_droit_x = x + (longueur / 2) + (hauteur / 2);
-		double sup_droit_y = y + (hauteur / 2) + (longueur + 2);
-
-		this->sup_droit = Coin (sup_droit_x, sup_droit_y);
-
-		double inf_gauche_x = x - (longueur / 2) - (hauteur / 2);
-		double inf_gauche_y = y - (hauteur / 2) - (longueur / 2);
-
-		this->inf_gauche = Coin (inf_gauche_x, inf_gauche_y);
-
-		double inf_droit_x = x + (longueur / 2) - (hauteur / 2);
-		double inf_droit_y = y - (hauteur / 2) + (longueur /2);
-
-		this->inf_droit = Coin(inf_droit_x, inf_droit_y);
+		this->sup_gauche = Coin (x - longueur / 2, y + hauteur / 2);
+		this->sup_droit = Coin (x + longueur / 2, y + hauteur / 2);
+		this->inf_gauche = Coin (x - longueur / 2, y - hauteur / 2);
+		this->inf_droit = Coin(x + longueur / 2, y - hauteur / 2);
 
 	}
 
-	friend std::istream& operator >> (std::istream& is, Rectangle& rectangle);
+	bool estPositif() {
+		return this->type == Type::positif;
+	}
+
+	friend std::istream& operator >> (std::istream&, Rectangle&);
+	friend std::ostream& operator << (std::ostream&, Coin&);
+	friend std::ostream& operator << (std::ostream&, Rectangle&);
+
 
 };
 
 class Grille{
 
-private:
-
-	std::vector<int> x;
-	std::vector<int> y;
-	std::vector<Rectangle> rectangles;
-
 public:
 
-	friend std::istream& operator >> (std::istream& is, Grille& grille);
+	std::vector<Rectangle> rectangles;
 
 	void ajouter(Rectangle& rectangle){
 
@@ -103,14 +90,19 @@ public:
 		return perimetre;
 	}
 
+	friend std::istream& operator >> (std::istream&, Grille&);
+
 };
 
 /**
 * Déclaration 
 **/
 std::ifstream& validation_fichier(std::ifstream&);
+std::ostream& operator << (std::ostream&, Rectangle&);
+std::ostream& operator << (std::ostream&, Rectangle::Coin&);
 std::istream& operator >> (std::istream&, Rectangle&);
 std::istream& operator >> (std::ifstream&, Grille&);
+
 
 /**
 * Main 
@@ -123,6 +115,10 @@ int main(){
 	Grille grille = Grille();
 	fichier >> grille;
 	fichier.close();
+
+	for (int i = 0; i < grille.rectangles.size() ; i++){
+		std::cout << grille.rectangles[i] << std::endl;
+	}
 
 	std::cout << "aire : " << grille.aire() << std::endl 
 	<< "perimetre : " << grille.perimetre() << std::endl;
@@ -168,6 +164,33 @@ std::ifstream& validation_fichier(std::ifstream& fichier){
 
 }
 
+std::ostream& operator << (std::ostream& os, Rectangle::Coin& coin){
+
+	os << "(" << coin.x << "," << coin.y << ")";
+
+	return os;
+}
+
+std::ostream& operator << (std::ostream& os, Rectangle& rectangle){
+
+	if (rectangle.estPositif()) {
+
+		os << "Rectangle positif" << std::endl;
+
+	} else {
+
+		os << "Rectangle negatif" << std::endl;
+	}
+
+	os << "Supérieur gauche : " << rectangle.sup_gauche << std::endl;
+	os << "Supérieur droite : " << rectangle.sup_droit << std::endl;
+	os << "Inférieur gauche : " << rectangle.inf_gauche << std::endl;
+	os << "Inférieur droit : " << rectangle.inf_droit << std::endl;
+	
+	return os;
+
+}
+
 std::istream& operator >> (std::istream& is, Rectangle& rectangle){
 
 	if(is){
@@ -180,7 +203,7 @@ std::istream& operator >> (std::istream& is, Rectangle& rectangle){
 		is >> y >> std::ws;
 		is >> longueur >> std::ws;
 		is >> hauteur >> std::ws;
-
+		std::cout << "X : " << x << " Y : " << y << " L : " << longueur << " H : "<<hauteur << std::endl;
 		rectangle = Rectangle(type, x, y, longueur, hauteur);
 
 	}
