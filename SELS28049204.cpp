@@ -12,7 +12,7 @@ class Rectangle {
 private:
 
     /**
-     * Représente d'un type de rectangle positif ou négatif
+     * Représentation d'un type positif ou négatif
      */
     enum class Type {
 
@@ -21,7 +21,7 @@ private:
     };
 
     /**
-     * Représentation d'un coin de rectangle sur les axes x et y
+     * Représentation d'un point du rectangle sur les axes x et y
      */
     class Point {
 
@@ -34,19 +34,13 @@ private:
          */
         Point() : x(0), y(0) {};
 
-
         /**
          * Constructeur qui initialize les coordonnées du Point
          *
          * @param x la coordonnée x du Point
          * @param y la coordonnée y du Point
          */
-        Point(double x, double y) {
-
-            this->x = x;
-            this->y = y;
-
-        }
+        Point(double _x, double _y) : x(_x), y(_y) {};
 
         friend std::ostream &operator<<(std::ostream &, Point &);
 
@@ -166,7 +160,7 @@ std::ifstream &validation_fichier(std::ifstream &fichier) {
 
         std::string repertoire;
 
-        std::cout << "Veuillez entrer le nom du fichier." << std::endl;
+        std::cout << "Entrez le nom du fichier : ";
         std::cin >> repertoire;
 
         fichier.open(repertoire.c_str());

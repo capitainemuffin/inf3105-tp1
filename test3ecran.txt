@@ -1,0 +1,3 @@
+Entrez le nom du fichier : test3.txt
+aire : 8.0
+perimetre : 16.0
