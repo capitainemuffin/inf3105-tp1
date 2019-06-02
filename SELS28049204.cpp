@@ -9,6 +9,8 @@
  */
 class Rectangle {
 
+private:
+
     /**
      * Représente d'un type de rectangle positif ou négatif
      */
@@ -21,51 +23,51 @@ class Rectangle {
     /**
      * Représentation d'un coin de rectangle sur les axes x et y
      */
-    class Coin {
+    class Point {
 
         double x, y;
 
     public:
 
         /**
-         * Constructeur par défaut d'un coin, coordonnées (0,0)
+         * Constructeur par défaut d'un Point, coordonnées (0,0)
          */
-        Coin() : x(0), y(0) {};
+        Point() : x(0), y(0) {};
 
 
         /**
-         * Constructeur qui initialize les coordonnées du coin
+         * Constructeur qui initialize les coordonnées du Point
          *
-         * @param x la coordonnée x du coin
-         * @param y la coordonnée y du coin
+         * @param x la coordonnée x du Point
+         * @param y la coordonnée y du Point
          */
-        Coin(double x, double y) {
+        Point(double x, double y) {
 
             this->x = x;
             this->y = y;
 
         }
 
-        friend std::ostream &operator<<(std::ostream &, Coin &);
+        friend std::ostream &operator<<(std::ostream &, Point &);
 
     };
 
 public:
 
     Type type;
-    Coin sup_gauche, sup_droit, inf_gauche, inf_droit;
+    Point sup_gauche, sup_droit, inf_gauche, inf_droit;
 
     /**
-     * Constructeur par défaut d'un rectangle, tous les coins à (0,0)
+     * Constructeur par défaut d'un rectangle, tous les Points à (0,0)
      */
     Rectangle() :
-            sup_gauche(Coin()),
-            sup_droit(Coin()),
-            inf_gauche(Coin()),
-            inf_droit(Coin()) {};
+            sup_gauche(Point()),
+            sup_droit(Point()),
+            inf_gauche(Point()),
+            inf_droit(Point()) {};
 
     /**
-     * Constructeur qui initialize les 4 coins du rectangle
+     * Constructeur qui initialize les 4 Coins du rectangle
      *
      * @param type positif ou negatif
      * @param x point milieu sur l'axe des x
@@ -79,10 +81,10 @@ public:
         assert(longueur > 0 && hauteur > 0);
 
         this->type = type == 'p' ? Type::positif : Type::negatif;
-        this->sup_gauche = Coin(x - longueur / 2, y + hauteur / 2);
-        this->sup_droit = Coin(x + longueur / 2, y + hauteur / 2);
-        this->inf_gauche = Coin(x - longueur / 2, y - hauteur / 2);
-        this->inf_droit = Coin(x + longueur / 2, y - hauteur / 2);
+        this->sup_gauche = Point(x - longueur / 2, y + hauteur / 2);
+        this->sup_droit = Point(x + longueur / 2, y + hauteur / 2);
+        this->inf_gauche = Point(x - longueur / 2, y - hauteur / 2);
+        this->inf_droit = Point(x + longueur / 2, y - hauteur / 2);
 
     }
 
@@ -97,7 +99,7 @@ public:
 
     friend std::istream &operator>>(std::ifstream &, Rectangle &);
 
-    friend std::ostream &operator<<(std::ostream &, Coin &);
+    friend std::ostream &operator<<(std::ostream &, Point &);
 
     friend std::ostream &operator<<(std::ostream &, Rectangle &);
 
@@ -169,7 +171,7 @@ std::ifstream &validation_fichier(std::ifstream &fichier) {
 
         fichier.open(repertoire.c_str());
 
-        if (repertoire.length() < 5 || !fichier) {
+        if (repertoire.length() < 5 || fichier.fail()) {
 
             std::cout << "Fichier spécifié invalide." << std::endl;
             fichier.close();
@@ -191,9 +193,9 @@ std::ifstream &validation_fichier(std::ifstream &fichier) {
 
 }
 
-std::ostream &operator<<(std::ostream &os, Rectangle::Coin &coin) {
+std::ostream &operator<<(std::ostream &os, Rectangle::Point &point) {
 
-    os << "(" << coin.x << "," << coin.y << ")";
+    os << "(" << point.x << "," << point.y << ")";
 
     return os;
 }
@@ -247,7 +249,7 @@ std::istream &operator>>(std::ifstream &is, Rectangle &rectangle) {
 }
 
 /**
- * Insère les rectangles lus dans le fichier dans la grille
+ * Insère les rectangles du fichier dans la grille
  *
  * @param is le fichier
  * @param grille l'instance de Grille
