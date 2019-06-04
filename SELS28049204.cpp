@@ -52,7 +52,7 @@ public:
     Type type;
     double longueur, hauteur;
     Point sup_gauche, sup_droit, inf_gauche, inf_droit;
-
+    int niveau;
     /**
      * Constructeur qui initialize les 4 Coins du rectangle
      *
@@ -62,7 +62,7 @@ public:
      * @param longueur longueur du rectangle
      * @param hauteur hauteur du rectangle
      */
-    Rectangle(char type, double x, double y, double longueur, double hauteur) {
+    Rectangle(char type, double x, double y, double longueur, double hauteur, int niveau) {
 
         assert(type == 'p' || type == 'n');
         assert(longueur > 0 && hauteur > 0);
@@ -75,6 +75,7 @@ public:
 
         this->longueur = longueur;
         this->hauteur = hauteur;
+        this->niveau = niveau;
 
     }
 
@@ -129,7 +130,7 @@ public:
         double y_haut = std::min(this->sup_gauche.y, rec2.sup_gauche.y);
         double y_bas = std::max(this->inf_droit.y, rec2.inf_droit.y);
 
-        return Rectangle('p', x_gauche, x_droit, x_droit - x_gauche, y_haut - y_bas);
+        return Rectangle('p', x_gauche, x_droit, x_droit - x_gauche, y_haut - y_bas, rec2.niveau + 1);
     }
 
     friend std::istream &operator>>(std::ifstream &, Rectangle &);
@@ -145,8 +146,8 @@ class Grille {
 
 public:
 
-    std::vector <Rectangle> rectangles_positifs;
-    std::vector <Rectangle> rectangles_negatifs;
+    std::vector<Rectangle> rectangles_positifs;
+    std::vector<Rectangle> rectangles_negatifs;
 
     /**
      * Ajoute le rectangle à la grille
@@ -155,7 +156,7 @@ public:
      */
     void ajouter(const Rectangle &rectangle) {
 
-        if(rectangle.estPositif()){
+        if (rectangle.estPositif()) {
             this->rectangles_positifs.push_back(rectangle);
             std::sort(rectangles_positifs.begin(), rectangles_positifs.end());
 
@@ -173,31 +174,57 @@ public:
      *
      * @return aire
      */
-    long double aire() {
+    static long double aire(std::vector<Rectangle> rectangles) {
 
         long double aire = 0;
+        std::cout << rectangles.size() << std::endl;
+        if (rectangles.size() > 1) {
 
-        for (int i = 0; i < rectangles_positifs.size(); i++) {
+            std::vector<Rectangle> sous_rectangles;
 
-            long double aire_a_soustraire = 0;
-            Rectangle rec1 = rectangles_positifs[i];
+            for (int i = 0; i < rectangles.size(); i++) {
 
-            for (int j = i+1; j < rectangles_positifs.size(); j++){
+                Rectangle rec1 = rectangles[i];
 
-                Rectangle rec2 = rectangles_positifs[j];
+                for (int j = i + 1; j < rectangles.size(); j++) {
 
-                if(rec1.croise(rec2)){
-                    std::cout << "croisement" << std::endl;
-                    const Rectangle croisement = rec1.croisement(rec2);
-                    aire_a_soustraire += croisement.longueur * croisement.hauteur;
+                    Rectangle rec2 = rectangles[j];
 
+                    if (rec1.croise(rec2)) {
+                        std::cout << "croisement" << std::endl;
+                        const Rectangle croisement = rec1.croisement(rec2);
+                        sous_rectangles.push_back(croisement);
+
+                    }
                 }
+
             }
 
-            aire += rec1.longueur * rec1.hauteur - aire_a_soustraire;
+            if(sous_rectangles[0].niveau %2 != 0){
+
+                aire += Grille::aire(sous_rectangles);
+
+            } else {
+
+                aire -= Grille::aire(sous_rectangles);
+
+            }
+
+        } else {
+
+            if(rectangles[0].niveau %2 != 0){
+
+                aire += Grille::aire(rectangles);
+
+            } else {
+
+                aire -= Grille::aire(rectangles);
+
+            }
         }
 
         return aire;
+
     }
 
     /**
@@ -214,11 +241,11 @@ public:
             long double perimetre_a_soustraire = 0;
             Rectangle rec1 = rectangles_positifs[i];
 
-            for (int j = i+1; j < rectangles_positifs.size(); j++){
+            for (int j = i + 1; j < rectangles_positifs.size(); j++) {
 
                 Rectangle rec2 = rectangles_positifs[j];
 
-                if(rec1.croise(rec2)){
+                if (rec1.croise(rec2)) {
 
                     const Rectangle croisement = rec1.croisement(rec2);
                     perimetre_a_soustraire += (croisement.longueur * 2) + (croisement.hauteur * 2);
@@ -324,10 +351,10 @@ std::istream &operator>>(std::ifstream &is, Grille &grille) {
         is >> std::setprecision(16) >> y >> std::ws;
         is >> std::setprecision(16) >> longueur >> std::ws;
         is >> std::setprecision(16) >> hauteur >> std::ws;
-        const Rectangle rectangle = Rectangle(type, x, y, longueur, hauteur);
+        const Rectangle rectangle = Rectangle(type, x, y, longueur, hauteur, 1);
 
         std::cout << "X : " << x << " Y : " << y << " L : " << std::setprecision(16) << longueur << " H : "
-        << std::setprecision(16) << hauteur << std::endl;
+                  << std::setprecision(16) << hauteur << std::endl;
 
         grille.ajouter(rectangle);
     }
@@ -347,12 +374,12 @@ int main() {
     fichier >> grille;
     fichier.close();
 
-    for(int i = 0; i < grille.rectangles_positifs.size(); i++){
+    for (int i = 0; i < grille.rectangles_positifs.size(); i++) {
 
         std::cout << grille.rectangles_positifs[i] << std::endl;
     }
 
-    std::cout << "aire : " << std::setprecision(16) << grille.aire() << std::endl
+    std::cout << "aire : " << std::setprecision(16) << grille.aire(grille.rectangles_positifs) << std::endl
               << "perimetre : " << std::setprecision(16) << grille.perimetre() << std::endl;
 
     return 0;
