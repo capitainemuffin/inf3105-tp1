@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <cassert>
+#include <iomanip>
 
 /**
 * Représentation d'un point sur les axes x et y
@@ -77,18 +78,6 @@ public:
 
     }
 
-    Rectangle(char type, Point sup_gauche, Point sup_droit, Point inf_gauche, Point inf_droit) {
-
-        this->type = type == 'p' ? Type::positif : Type::negatif;
-        this->sup_gauche = sup_gauche;
-        this->sup_droit = sup_droit;
-        this->inf_gauche = inf_gauche;
-        this->inf_droit = inf_droit;
-
-        this->longueur = this->sup_droit.x - this->sup_gauche.x;
-        this->hauteur = this->sup_gauche.y - inf_gauche.y;
-    }
-
     /**
      * Teste si le rectangle est positif ou negatif
      *
@@ -139,8 +128,6 @@ public:
         double x_droit = std::min(this->sup_droit.x, rec2.sup_droit.x);
         double y_haut = std::min(this->sup_gauche.y, rec2.sup_gauche.y);
         double y_bas = std::max(this->inf_droit.y, rec2.inf_droit.y);
-
-
 
         return Rectangle('p', x_gauche, x_droit, x_droit - x_gauche, y_haut - y_bas);
     }
@@ -200,7 +187,7 @@ public:
                 Rectangle rec2 = rectangles_positifs[j];
 
                 if(rec1.croise(rec2)){
-
+                    std::cout << "croisement" << std::endl;
                     const Rectangle croisement = rec1.croisement(rec2);
                     aire_a_soustraire += croisement.longueur * croisement.hauteur;
 
@@ -293,7 +280,7 @@ std::ifstream &validation_fichier(std::ifstream &fichier) {
 
 std::ostream &operator<<(std::ostream &os, Point &point) {
 
-    os << "(" << point.x << "," << point.y << ")";
+    os << "(" << std::setprecision(16) << point.x << "," << point.y << ")";
 
     return os;
 }
@@ -309,10 +296,10 @@ std::ostream &operator<<(std::ostream &os, Rectangle &rectangle) {
         os << "Rectangle negatif" << std::endl;
     }
 
-    os << "Supérieur gauche : " << rectangle.sup_gauche << std::endl;
-    os << "Supérieur droite : " << rectangle.sup_droit << std::endl;
-    os << "Inférieur gauche : " << rectangle.inf_gauche << std::endl;
-    os << "Inférieur droit : " << rectangle.inf_droit << std::endl;
+    os << "Supérieur gauche : " << std::setprecision(16) << rectangle.sup_gauche << std::endl;
+    os << "Supérieur droite : " << std::setprecision(16) << rectangle.sup_droit << std::endl;
+    os << "Inférieur gauche : " << std::setprecision(16) << rectangle.inf_gauche << std::endl;
+    os << "Inférieur droit : " << std::setprecision(16) << rectangle.inf_droit << std::endl;
 
     return os;
 
@@ -333,13 +320,14 @@ std::istream &operator>>(std::ifstream &is, Grille &grille) {
         double x, y, longueur, hauteur;
 
         is >> type >> std::ws;
-        is >> x >> std::ws;
-        is >> y >> std::ws;
-        is >> longueur >> std::ws;
-        is >> hauteur >> std::ws;
+        is >> std::setprecision(16) >> x >> std::ws;
+        is >> std::setprecision(16) >> y >> std::ws;
+        is >> std::setprecision(16) >> longueur >> std::ws;
+        is >> std::setprecision(16) >> hauteur >> std::ws;
         const Rectangle rectangle = Rectangle(type, x, y, longueur, hauteur);
 
-//        std::cout << "X : " << x << " Y : " << y << " L : " << longueur << " H : " << hauteur << std::endl;
+        std::cout << "X : " << x << " Y : " << y << " L : " << std::setprecision(16) << longueur << " H : "
+        << std::setprecision(16) << hauteur << std::endl;
 
         grille.ajouter(rectangle);
     }
@@ -364,7 +352,9 @@ int main() {
         std::cout << grille.rectangles_positifs[i] << std::endl;
     }
 
-    std::cout << "aire : " << grille.aire() << std::endl
-              << "perimetre : " << grille.perimetre() << std::endl;
+    std::cout << "aire : " << std::setprecision(16) << grille.aire() << std::endl
+              << "perimetre : " << std::setprecision(16) << grille.perimetre() << std::endl;
+
+    return 0;
 
 }
