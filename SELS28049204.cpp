@@ -4,6 +4,23 @@
 #include <vector>
 #include <cassert>
 #include <iomanip>
+#include <algorithm>
+
+class Intervale {
+public :
+    double p1, p2;
+    std::vector<Intervale> ptr_intervales_y;
+
+    Intervale(double p1, double p2):p1(p1), p2(p2){
+    }
+
+    Intervale(Intervale& i1, Intervale& i2){
+
+        this->p1 = i1.p1;
+        this->p2 = i2.p2;
+    }
+};
+
 
 /**
 * Représentation d'un point sur les axes x et y
@@ -174,54 +191,87 @@ public:
      *
      * @return aire
      */
-    static long double aire(std::vector<Rectangle> rectangles) {
+    long double aire() {
 
-        long double aire = 0;
-        std::cout << rectangles.size() << std::endl;
-        if (rectangles.size() > 1) {
+        std::vector<Intervale> intervales_x;
+        std::vector<double> tous_les_x;
 
-            std::vector<Rectangle> sous_rectangles;
+        // calculer les intervales x
+        for (auto& rectangle : this->rectangles_positifs){
 
-            for (int i = 0; i < rectangles.size(); i++) {
+            double temp = rectangle.inf_gauche.x;
 
-                Rectangle rec1 = rectangles[i];
+            if(!std::find(tous_les_x.begin(), tous_les_x.end(), temp)){
 
-                for (int j = i + 1; j < rectangles.size(); j++) {
+                tous_les_x.push_back(temp);
+            }
 
-                    Rectangle rec2 = rectangles[j];
+            temp = rectangle.inf_droit.x;
 
-                    if (rec1.croise(rec2)) {
-                        std::cout << "croisement" << std::endl;
-                        const Rectangle croisement = rec1.croisement(rec2);
-                        sous_rectangles.push_back(croisement);
+            if(!std::find(tous_les_x.begin(), tous_les_x.end(), temp)){
 
-                    }
+                tous_les_x.push_back(temp);
+            }
+        }
+
+        std::sort(rectangles_positifs.begin(), rectangles_positifs.end());
+
+
+
+        //calculer les intervales y
+        for(auto& intervale_x : intervales_x){
+
+            for(auto& rectangle : this->rectangles_positifs){
+
+                if (rectangle.inf_gauche.x <= intervale_x.p1 && rectangle.inf_droit.x >= intervale_x.p2){
+                    //ce rectangle est dans cet intervale, mettre les intervales y1 et y2
+                    const Intervale intervale_y = Intervale(rectangle.inf_gauche.y, rectangle.sup_gauche.y);
+
+                    intervale_x.ptr_intervales_y.push_back(intervale_y);
+
+                }
+            }
+        }
+
+        //fusionner les intervalles y qui se chevauchent
+        for(auto& intervale_x : intervales_x){
+
+            std::vector<Intervale> intervales_fusionnees;
+
+            for(int i = 0 ; i < intervale_x.ptr_intervales_y.size() -1 ; i++){
+
+
+                Intervale intervale_1 = intervale_x.ptr_intervales_y[i];
+                Intervale intervale_2 = intervale_x.ptr_intervales_y[i+1];
+
+                if(intervale_1.p2 < intervale_2.p1){
+
+                    Intervale inter = Intervale(intervale_1, intervale_2);
+                    intervales_fusionnees.push_back(inter);
+
+                } else {
+
+                    intervales_fusionnees.push_back(intervale_1);
                 }
 
             }
 
-            if(sous_rectangles[0].niveau %2 != 0){
+            intervale_x.ptr_intervales_y = intervales_fusionnees;
+        }
+        //calculer l'aire
+        long double aire = 0;
 
-                aire += Grille::aire(sous_rectangles);
+        for(const auto& intervale : intervales_x){
 
-            } else {
+            for(int i = 0 ; i < intervale.ptr_intervales_y.size(); i++){
 
-                aire -= Grille::aire(sous_rectangles);
+                double longueur = intervale.p2 - intervale.p1;
+                double hauteur = intervale.ptr_intervales_y[i].p2 - intervale.ptr_intervales_y[i].p1;
 
-            }
-
-        } else {
-
-            if(rectangles[0].niveau %2 != 0){
-
-                aire += Grille::aire(rectangles);
-
-            } else {
-
-                aire -= Grille::aire(rectangles);
-
+                aire += (longueur * hauteur);
             }
         }
+
 
         return aire;
 
@@ -235,26 +285,6 @@ public:
     double perimetre() {
 
         double perimetre = 0;
-
-        for (int i = 0; i < rectangles_positifs.size(); i++) {
-
-            long double perimetre_a_soustraire = 0;
-            Rectangle rec1 = rectangles_positifs[i];
-
-            for (int j = i + 1; j < rectangles_positifs.size(); j++) {
-
-                Rectangle rec2 = rectangles_positifs[j];
-
-                if (rec1.croise(rec2)) {
-
-                    const Rectangle croisement = rec1.croisement(rec2);
-                    perimetre_a_soustraire += (croisement.longueur * 2) + (croisement.hauteur * 2);
-
-                }
-            }
-
-            perimetre += (rec1.longueur * 2) + (rec1.hauteur * 2) - perimetre_a_soustraire;
-        }
 
         return perimetre;
     }
@@ -379,7 +409,7 @@ int main() {
         std::cout << grille.rectangles_positifs[i] << std::endl;
     }
 
-    std::cout << "aire : " << std::setprecision(16) << grille.aire(grille.rectangles_positifs) << std::endl
+    std::cout << "aire : " << std::setprecision(16) << grille.aire() << std::endl
               << "perimetre : " << std::setprecision(16) << grille.perimetre() << std::endl;
 
     return 0;
