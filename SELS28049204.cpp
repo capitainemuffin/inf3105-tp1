@@ -9,7 +9,7 @@
 class Intervale {
 public :
     double p1, p2;
-    std::vector<Intervale> ptr_intervales_y;
+    std::vector<Intervale> intervales_y;
 
     Intervale(double p1, double p2):p1(p1), p2(p2){
     }
@@ -18,6 +18,12 @@ public :
 
         this->p1 = i1.p1;
         this->p2 = i2.p2;
+    }
+
+    bool operator==(const Intervale& i2){
+
+        return this->p1 == i2.p1 && this->p2 == i2.p2;
+
     }
 };
 
@@ -186,6 +192,8 @@ public:
 
     }
 
+
+
     /**
      * Calcule l'aire de tous les rectangles
      *
@@ -201,21 +209,25 @@ public:
 
             double temp = rectangle.inf_gauche.x;
 
-            if(!std::find(tous_les_x.begin(), tous_les_x.end(), temp)){
+            if(!(std::find(tous_les_x.begin(), tous_les_x.end(), temp) != tous_les_x.end())){
 
                 tous_les_x.push_back(temp);
             }
 
             temp = rectangle.inf_droit.x;
 
-            if(!std::find(tous_les_x.begin(), tous_les_x.end(), temp)){
+            if(!(std::find(tous_les_x.begin(), tous_les_x.end(), temp) != tous_les_x.end())){
 
                 tous_les_x.push_back(temp);
             }
         }
 
-        std::sort(rectangles_positifs.begin(), rectangles_positifs.end());
+        std::sort(tous_les_x.begin(), tous_les_x.end());
 
+        for (int i = 0 ; i < tous_les_x.size() -1 ; i++){
+
+            intervales_x.emplace_back(Intervale(tous_les_x[i], tous_les_x[i+1]));
+        }
 
 
         //calculer les intervales y
@@ -227,46 +239,52 @@ public:
                     //ce rectangle est dans cet intervale, mettre les intervales y1 et y2
                     const Intervale intervale_y = Intervale(rectangle.inf_gauche.y, rectangle.sup_gauche.y);
 
-                    intervale_x.ptr_intervales_y.push_back(intervale_y);
+                    intervale_x.intervales_y.push_back(intervale_y);
 
                 }
             }
         }
 
-        //fusionner les intervalles y qui se chevauchent
+        //fusionner les intervalles y qui se chevauchent ou qui sont identiques
         for(auto& intervale_x : intervales_x){
 
             std::vector<Intervale> intervales_fusionnees;
 
-            for(int i = 0 ; i < intervale_x.ptr_intervales_y.size() -1 ; i++){
+            if(intervale_x.intervales_y.size() > 1){
 
+                for(int i = 0 ; i < intervale_x.intervales_y.size() -1; i++){
 
-                Intervale intervale_1 = intervale_x.ptr_intervales_y[i];
-                Intervale intervale_2 = intervale_x.ptr_intervales_y[i+1];
+                    if(intervale_x.intervales_y[i].p2 >= intervale_x.intervales_y[i+1].p1){
 
-                if(intervale_1.p2 < intervale_2.p1){
+                        Intervale inter = Intervale(intervale_x.intervales_y[i], intervale_x.intervales_y[i+1]);
 
-                    Intervale inter = Intervale(intervale_1, intervale_2);
-                    intervales_fusionnees.push_back(inter);
+                        if(!(std::find(intervales_fusionnees.begin(), intervales_fusionnees.end(), inter) != intervales_fusionnees.end())){
 
-                } else {
+                            intervales_fusionnees.push_back(inter);
+                        }
 
-                    intervales_fusionnees.push_back(intervale_1);
+                    } else {
+
+                        intervales_fusionnees.push_back(intervale_x.intervales_y[i]);
+
+                    }
+
                 }
+
+                intervale_x.intervales_y = intervales_fusionnees;
 
             }
 
-            intervale_x.ptr_intervales_y = intervales_fusionnees;
         }
         //calculer l'aire
         long double aire = 0;
 
         for(const auto& intervale : intervales_x){
 
-            for(int i = 0 ; i < intervale.ptr_intervales_y.size(); i++){
+            for(int i = 0 ; i < intervale.intervales_y.size(); i++){
 
                 double longueur = intervale.p2 - intervale.p1;
-                double hauteur = intervale.ptr_intervales_y[i].p2 - intervale.ptr_intervales_y[i].p1;
+                double hauteur = intervale.intervales_y[i].p2 - intervale.intervales_y[i].p1;
 
                 aire += (longueur * hauteur);
             }
