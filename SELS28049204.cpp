@@ -11,19 +11,23 @@ public :
     double p1, p2;
     std::vector<Intervale> intervales_y;
 
-    Intervale(double p1, double p2):p1(p1), p2(p2){
+    Intervale(double p1, double p2) : p1(p1), p2(p2) {
     }
 
-    Intervale(Intervale& i1, Intervale& i2){
-
-        this->p1 = i1.p1;
-        this->p2 = i2.p2;
-    }
-
-    bool operator==(const Intervale& i2){
+    bool operator==(const Intervale &i2) {
 
         return this->p1 == i2.p1 && this->p2 == i2.p2;
 
+    }
+
+    friend bool operator<(const Intervale& i1, const Intervale &i2){
+
+        return i1.p2 < i2.p2;
+    }
+
+    friend bool operator>(const Intervale& i1, const Intervale &i2){
+
+        return i1.p2 > i2.p2;
     }
 };
 
@@ -73,9 +77,8 @@ private:
 public:
 
     Type type;
-    double longueur, hauteur;
     Point sup_gauche, sup_droit, inf_gauche, inf_droit;
-    int niveau;
+
     /**
      * Constructeur qui initialize les 4 Coins du rectangle
      *
@@ -96,10 +99,6 @@ public:
         this->inf_gauche = Point(x - longueur / 2, y - hauteur / 2);
         this->inf_droit = Point(x + longueur / 2, y - hauteur / 2);
 
-        this->longueur = longueur;
-        this->hauteur = hauteur;
-        this->niveau = niveau;
-
     }
 
     /**
@@ -110,53 +109,6 @@ public:
     bool estPositif() const {
         return this->type == Type::positif;
     }
-
-    /**
-     * Teste si le premier Rectangle est plus petit que le deuxième.
-     *
-     * @param rec1 instance de Rectangle
-     * @param rec2 instance de Rectangle
-     * @return true si plus petit, faux sinon
-     */
-    friend bool operator<(const Rectangle &rec1, const Rectangle &rec2) {
-
-        bool plusPetit = false;
-
-        if (rec1.inf_gauche.x < rec2.inf_gauche.x) {
-
-            plusPetit = true;
-
-        } else if (rec1.inf_gauche.x == rec2.inf_gauche.x && rec1.inf_gauche.y < rec2.inf_gauche.y) {
-
-            plusPetit = true;
-
-        }
-
-        return plusPetit;
-
-    }
-
-    bool croise(const Rectangle &rec2) {
-
-        return
-                this->sup_gauche.x < rec2.inf_droit.x &&
-                this->inf_droit.x > rec2.sup_gauche.x &&
-                this->sup_gauche.y > rec2.inf_droit.y &&
-                this->inf_droit.y < rec2.sup_gauche.y;
-
-    }
-
-    Rectangle croisement(const Rectangle &rec2) {
-
-        double x_gauche = std::max(this->inf_gauche.x, rec2.inf_gauche.x);
-        double x_droit = std::min(this->sup_droit.x, rec2.sup_droit.x);
-        double y_haut = std::min(this->sup_gauche.y, rec2.sup_gauche.y);
-        double y_bas = std::max(this->inf_droit.y, rec2.inf_droit.y);
-
-        return Rectangle('p', x_gauche, x_droit, x_droit - x_gauche, y_haut - y_bas, rec2.niveau + 1);
-    }
-
-    friend std::istream &operator>>(std::ifstream &, Rectangle &);
 
     friend std::ostream &operator<<(std::ostream &, Rectangle &);
 
@@ -181,17 +133,14 @@ public:
 
         if (rectangle.estPositif()) {
             this->rectangles_positifs.push_back(rectangle);
-            std::sort(rectangles_positifs.begin(), rectangles_positifs.end());
 
         } else {
 
             this->rectangles_negatifs.push_back(rectangle);
-            std::sort(rectangles_negatifs.begin(), rectangles_negatifs.end());
 
         }
 
     }
-
 
 
     /**
@@ -205,18 +154,18 @@ public:
         std::vector<double> tous_les_x;
 
         // calculer les intervales x
-        for (auto& rectangle : this->rectangles_positifs){
+        for (auto &rectangle : this->rectangles_positifs) {
 
             double temp = rectangle.inf_gauche.x;
 
-            if(!(std::find(tous_les_x.begin(), tous_les_x.end(), temp) != tous_les_x.end())){
+            if (!(std::find(tous_les_x.begin(), tous_les_x.end(), temp) != tous_les_x.end())) {
 
                 tous_les_x.push_back(temp);
             }
 
             temp = rectangle.inf_droit.x;
 
-            if(!(std::find(tous_les_x.begin(), tous_les_x.end(), temp) != tous_les_x.end())){
+            if (!(std::find(tous_les_x.begin(), tous_les_x.end(), temp) != tous_les_x.end())) {
 
                 tous_les_x.push_back(temp);
             }
@@ -224,18 +173,18 @@ public:
 
         std::sort(tous_les_x.begin(), tous_les_x.end());
 
-        for (int i = 0 ; i < tous_les_x.size() -1 ; i++){
+        for (int i = 0; i < tous_les_x.size() - 1; i++) {
 
-            intervales_x.emplace_back(Intervale(tous_les_x[i], tous_les_x[i+1]));
+            intervales_x.__emplace_back(Intervale(tous_les_x[i], tous_les_x[i + 1]));
         }
 
 
         //calculer les intervales y
-        for(auto& intervale_x : intervales_x){
+        for (auto &intervale_x : intervales_x) {
 
-            for(auto& rectangle : this->rectangles_positifs){
+            for (auto &rectangle : this->rectangles_positifs) {
 
-                if (rectangle.inf_gauche.x <= intervale_x.p1 && rectangle.inf_droit.x >= intervale_x.p2){
+                if (rectangle.inf_gauche.x <= intervale_x.p1 && rectangle.inf_droit.x >= intervale_x.p2) {
                     //ce rectangle est dans cet intervale, mettre les intervales y1 et y2
                     const Intervale intervale_y = Intervale(rectangle.inf_gauche.y, rectangle.sup_gauche.y);
 
@@ -243,45 +192,57 @@ public:
 
                 }
             }
+
+            std::sort(intervale_x.intervales_y.begin(), intervale_x.intervales_y.end());
         }
 
         //fusionner les intervalles y qui se chevauchent ou qui sont identiques
-        for(auto& intervale_x : intervales_x){
+        for (auto &intervale_x : intervales_x) {
 
-            std::vector<Intervale> intervales_fusionnees;
+            std::vector<Intervale> fusions_y;
 
-            if(intervale_x.intervales_y.size() > 1){
+            for (int i = intervale_x.intervales_y.size() - 1; i >= 0; i--) {
 
-                for(int i = 0 ; i < intervale_x.intervales_y.size() -1; i++){
+                double min = intervale_x.intervales_y[i].p1;
+                double max = intervale_x.intervales_y[i].p2;
 
-                    if(intervale_x.intervales_y[i].p2 >= intervale_x.intervales_y[i+1].p1){
+                int j = i - 1;
 
-                        Intervale inter = Intervale(intervale_x.intervales_y[i], intervale_x.intervales_y[i+1]);
+                while (j >= 0) {
 
-                        if(!(std::find(intervales_fusionnees.begin(), intervales_fusionnees.end(), inter) != intervales_fusionnees.end())){
+                    if (min <= intervale_x.intervales_y[j].p2 && min >= intervale_x.intervales_y[j].p1) {
 
-                            intervales_fusionnees.push_back(inter);
-                        }
+                        min = intervale_x.intervales_y[j].p1;
+                        i--;
 
-                    } else {
-
-                        intervales_fusionnees.push_back(intervale_x.intervales_y[i]);
-
+                    } else if (min <= intervale_x.intervales_y[j].p1 && max >= intervale_x.intervales_y[j].p2){
+                        i --;
                     }
 
+                    j--;
                 }
 
-                intervale_x.intervales_y = intervales_fusionnees;
+                Intervale int_y = Intervale(min, max);
+
+                //vérifier que l'intervale fusionnée ne se trouve pas déjà dans la liste
+                if (!(std::find(fusions_y.begin(), fusions_y.end(), int_y) != fusions_y.end())) {
+
+                    fusions_y.push_back(int_y);
+                }
 
             }
 
+                intervale_x.intervales_y = fusions_y;
+
         }
+
+
         //calculer l'aire
         long double aire = 0;
 
-        for(const auto& intervale : intervales_x){
+        for (const auto &intervale : intervales_x) {
 
-            for(int i = 0 ; i < intervale.intervales_y.size(); i++){
+            for (int i = 0; i < intervale.intervales_y.size(); i++) {
 
                 double longueur = intervale.p2 - intervale.p1;
                 double hauteur = intervale.intervales_y[i].p2 - intervale.intervales_y[i].p1;
@@ -306,8 +267,6 @@ public:
 
         return perimetre;
     }
-
-    friend std::istream &operator>>(std::istream &, Grille &);
 
 };
 
