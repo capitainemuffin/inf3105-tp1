@@ -514,9 +514,6 @@ std::istream &operator>>(std::ifstream &is, Grille &grille) {
         is >> std::setprecision(16) >> hauteur >> std::ws;
         const Rectangle rectangle = Rectangle(type, x, y, longueur, hauteur);
 
-        std::cout << "X : " << x << " Y : " << y << " L : " << std::setprecision(16) << longueur << " H : "
-                  << std::setprecision(16) << hauteur << std::endl;
-
         if (rectangle.type == Type::positif) {
 
             grille.rectangles_positifs.push_back(rectangle);
