@@ -1,7 +1,7 @@
 OPTIONS = -lm -std=c++11
 
-a.out : SELS28049204.cpp
-	g++ SELS28049204.cpp $(OPTIONS)
+a.out : sofianeselaouiTP1.cpp
+	g++ sofianeselaouiTP1.cpp $(OPTIONS)
 
 .PHONY : clean 
 

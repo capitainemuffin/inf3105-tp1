@@ -171,9 +171,6 @@ public:
      */
     Rectangle(char type, double x, double y, double longueur, double hauteur) {
 
-        assert(type == 'p' || type == 'n');
-        assert(longueur > 0 && hauteur > 0);
-
         this->type = type == 'p' ? Type::positif : Type::negatif;
         this->sup_gauche = Point(x - longueur / 2, y + hauteur / 2);
         this->sup_droit = Point(x + longueur / 2, y + hauteur / 2);
@@ -199,6 +196,19 @@ public:
     }
 
     /**
+     * Retourne si l'instance touche ou croise le Rectangle rec2
+     * @param rec2 instance d'un Rectangle
+     * @return True si touche ou croise False sinon
+     */
+    bool touche(const Rectangle &rec2) {
+
+        return this->sup_gauche.x <= rec2.inf_droit.x &&
+               this->inf_droit.x >= rec2.sup_gauche.x &&
+               this->sup_gauche.y >= rec2.inf_droit.y &&
+               this->inf_droit.y <= rec2.sup_gauche.y;
+    }
+
+    /**
      * Retourne un rectangle qui représente le croisement du rectangle actuel et rec2
      *
      * @param rec2 Rectangle
@@ -209,7 +219,8 @@ public:
         double x_droit = std::min(this->sup_droit.x, rec2.sup_droit.x);
         double y_haut = std::min(this->sup_gauche.y, rec2.sup_gauche.y);
         double y_bas = std::max(this->inf_droit.y, rec2.inf_droit.y);
-        return Rectangle('p', x_gauche, x_droit, x_droit - x_gauche, y_haut - y_bas);
+        return Rectangle('p', x_gauche + (x_droit - x_gauche) / 2, y_bas + (y_haut - y_bas) / 2, x_droit - x_gauche,
+                         y_haut - y_bas);
     }
 
 };
@@ -256,7 +267,7 @@ private:
         std::vector<IntervaleX> intervales_x;
         for (int i = 0; i < tous_les_x.size() - 1; i++) {
 
-            intervales_x.__emplace_back(IntervaleX(tous_les_x[i], tous_les_x[i + 1]));
+            intervales_x.push_back(IntervaleX(tous_les_x[i], tous_les_x[i + 1]));
         }
 
         return intervales_x;
@@ -271,7 +282,6 @@ private:
      * @return liste d'intervaleY
      */
     static std::vector<IntervaleY> get_intervales_y(IntervaleX intervale_x, std::vector<Rectangle> &rectangles) {
-
 
         //Créer les intervales Y
         for (auto &rectangle : rectangles) {
@@ -342,11 +352,6 @@ private:
 
     }
 
-public:
-
-    std::vector<Rectangle> rectangles_positifs;
-    std::vector<Rectangle> rectangles_negatifs;
-
     /**
      * Fractionne les rectangles de la grille selon des intervales X et Y.
      */
@@ -369,7 +374,7 @@ public:
                     double x = intervale_x.p1 + longueur / 2;
                     double y = intervale_y.p1 + hauteur / 2;
                     char type = intervale_y.type == Type::positif ? 'p' : 'n';
-                    rectangles_fractionnes_positifs.__emplace_back(Rectangle(type, x, y, longueur, hauteur));
+                    rectangles_fractionnes_positifs.push_back(Rectangle(type, x, y, longueur, hauteur));
                 }
             }
 
@@ -394,7 +399,7 @@ public:
                     double x = intervale_x.p1 + longueur / 2;
                     double y = intervale_y.p1 + hauteur / 2;
                     char type = intervale_y.type == Type::positif ? 'p' : 'n';
-                    rectangles_fractionnes_negatifs.__emplace_back(Rectangle(type, x, y, longueur, hauteur));
+                    rectangles_fractionnes_negatifs.push_back(Rectangle(type, x, y, longueur, hauteur));
                 }
             }
 
@@ -404,12 +409,18 @@ public:
 
     }
 
+public:
+
+    std::vector<Rectangle> rectangles_positifs;
+    std::vector<Rectangle> rectangles_negatifs;
+
     /**
      * Retourne l'aire de la forme sur la grille
      *
      * @return aire
      */
     long double aire() {
+
 
         fractionner_rectangles();
         long double aire = 0;
@@ -442,9 +453,88 @@ public:
     double perimetre() {
 
         fractionner_rectangles();
-
-
         double perimetre = 0;
+
+
+        for (int i = 0; i < this->rectangles_positifs.size(); i++) {
+
+            double hauteur = rectangles_positifs[i].sup_droit.y - rectangles_positifs[i].inf_droit.y;
+            double longueur = rectangles_positifs[i].sup_droit.x - rectangles_positifs[i].sup_gauche.x;
+            perimetre += (longueur * 2) + (hauteur * 2);
+
+            for (int j = i + 1; j < this->rectangles_positifs.size(); j++) {
+
+                if (this->rectangles_positifs[i].touche(this->rectangles_positifs[j])) {
+
+                    Rectangle croisement = this->rectangles_positifs[i].croisement(this->rectangles_positifs[j]);
+                    double hauteur_temp = croisement.sup_droit.y - croisement.inf_droit.y;
+                    double longueur_temp = croisement.sup_droit.x - croisement.sup_gauche.x;
+                    perimetre -= (hauteur_temp * 2) + (longueur_temp * 2);
+
+                }
+            }
+
+            for (int z = 0; z < this->rectangles_negatifs.size(); z++) {
+
+                if (rectangles_positifs[i].croise(rectangles_negatifs[z])) {
+
+                    Rectangle croisement = rectangles_positifs[i].croisement(rectangles_negatifs[z]);
+                    double hauteur_temp = croisement.sup_droit.y - croisement.inf_droit.y;
+                    double longueur_temp = croisement.sup_droit.x - croisement.sup_gauche.x;
+
+
+                    if (hauteur == hauteur_temp && longueur == longueur_temp) {
+                        // retirer le rectangle positif si le rectangle negatif l'a englouti
+                        perimetre -= (longueur_temp * 2 + hauteur_temp * 2);
+
+                    } else {
+
+                        //additionner ou soustraire les segments du rectangle qui représentent le croisement,
+                        //selon si le segment est à l'intérieur du rectangle positif ou du rectangle
+                        //negatif
+                        if (croisement.inf_gauche.x == rectangles_negatifs[z].inf_gauche.x) {
+                            perimetre += hauteur_temp;
+
+                        } else {
+
+                            perimetre -= hauteur_temp;
+
+                        }
+
+                        if (croisement.inf_droit.x == rectangles_negatifs[z].inf_droit.x) {
+
+                            perimetre += hauteur_temp;
+
+                        } else {
+
+                            perimetre -= hauteur_temp;
+
+                        }
+                        if (croisement.inf_gauche.y == rectangles_negatifs[z].inf_gauche.y) {
+
+                            perimetre += longueur_temp;
+
+                        } else {
+
+                            perimetre -= longueur_temp;
+
+                        }
+                        if (croisement.sup_gauche.y == rectangles_negatifs[z].sup_gauche.y) {
+
+                            perimetre += longueur_temp;
+
+                        } else {
+
+                            perimetre -= longueur_temp;
+
+                        }
+
+                    }
+
+                }
+            }
+
+        }
 
         return perimetre;
     }
@@ -512,6 +602,10 @@ std::istream &operator>>(std::ifstream &is, Grille &grille) {
         is >> std::setprecision(16) >> y >> std::ws;
         is >> std::setprecision(16) >> longueur >> std::ws;
         is >> std::setprecision(16) >> hauteur >> std::ws;
+
+        assert(type == 'p' || type == 'n');
+        assert(longueur > 0 && hauteur > 0);
+
         const Rectangle rectangle = Rectangle(type, x, y, longueur, hauteur);
 
         if (rectangle.type == Type::positif) {

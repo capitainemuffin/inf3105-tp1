@@ -1,0 +1,7 @@
+#! /usr/bin/expect
+foreach arg { 1 3 5 7 8 9 } {
+	spawn ./a.out 
+	expect "Entrez le nom du fichier : "
+	send "test$arg.txt\r"
+	interact
+} 
