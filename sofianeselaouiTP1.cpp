@@ -598,10 +598,10 @@ std::istream &operator>>(std::ifstream &is, Grille &grille) {
         double x, y, longueur, hauteur;
 
         is >> type >> std::ws;
-        is >> std::setprecision(16) >> x >> std::ws;
-        is >> std::setprecision(16) >> y >> std::ws;
-        is >> std::setprecision(16) >> longueur >> std::ws;
-        is >> std::setprecision(16) >> hauteur >> std::ws;
+        is >> std::setprecision(17) >> x >> std::ws;
+        is >> std::setprecision(17) >> y >> std::ws;
+        is >> std::setprecision(17) >> longueur >> std::ws;
+        is >> std::setprecision(17) >> hauteur >> std::ws;
 
         assert(type == 'p' || type == 'n');
         assert(longueur > 0 && hauteur > 0);
@@ -633,8 +633,8 @@ int main() {
     fichier >> grille;
     fichier.close();
 
-    std::cout << "aire : " << std::setprecision(16) << grille.aire() << std::endl
-              << "perimetre : " << std::setprecision(16) << grille.perimetre() << std::endl;
+    std::cout << "aire : " << std::setprecision(17) << grille.aire() << std::endl
+              << "perimetre : " << std::setprecision(17) << grille.perimetre() << std::endl;
 
     return 0;
 
